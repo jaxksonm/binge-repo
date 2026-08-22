@@ -1,122 +1,74 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState } from "react";
 
-function App() {
-  const [count, setCount] = useState(0)
+const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
+const POSTER_BASE_URL = "https://image.tmdb.org/t/p/w500";
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+async function getRandomMovieId() {
+  const page = Math.floor(Math.random() * 10) + 1;
+  const url = `https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&page=${page}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  const movie = data.results[Math.floor(Math.random() * data.results.length)];
+  return movie.id;
 }
 
-export default App
+async function getMovieDetails(movieId) {
+  const url = `https://api.themoviedb.org/3/movie/${movieId}?api_key=${API_KEY}`;
+  const res = await fetch(url);
+  return res.json();
+}
+
+async function getMovie() {
+  const movieId = await getRandomMovieId();
+  const details = await getMovieDetails(movieId);
+
+  return {
+    title: details.title,
+    overview: details.overview,
+    runtime: details.runtime,
+    genres: details.genres.map((g) => g.name),
+    posterUrl: details.poster_path
+      ? `${POSTER_BASE_URL}${details.poster_path}`
+      : null,
+  };
+}
+
+function App() {
+  const [movie, setMovie] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleClick = async () => {
+    setLoading(true);
+    try {
+      const result = await getMovie();
+      setMovie(result);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{ maxWidth: 500, margin: "40px auto", fontFamily: "sans-serif", textAlign: "center" }}>
+      <h1>Random Movie</h1>
+      <button onClick={handleClick} disabled={loading}>
+        {loading ? "Loading..." : "Get Random Movie"}
+      </button>
+
+      {movie && (
+        <div style={{ marginTop: 20, textAlign: "left" }}>
+          <h2>{movie.title}</h2>
+          {movie.posterUrl && (
+            <img src={movie.posterUrl} alt={movie.title} style={{ width: "100%" }} />
+          )}
+          <p><strong>Genres:</strong> {movie.genres.join(", ")}</p>
+          <p><strong>Runtime:</strong> {movie.runtime} minutes</p>
+          <p><strong>Overview:</strong> {movie.overview}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default App;
