@@ -1,36 +1,37 @@
-import random 
+import random
+import os
+import requests
+import urllib3
+from dotenv import load_dotenv
+
+# force ipv4 
+urllib3.util.connection.HAS_IPV6 = False
+
+load_dotenv() # load the env file 
+
+API_KEY = os.getenv("IMDB_API_KEY") # use this api key for the movie 
 
 
-names = ["Olivia", "Sophia", "Isabella", "Ava", "Mia", "Charlotte", 
-               "Amelia", "Harper", "Evelyn", "Luna", "Aria", "Ella", 
-               "Scarlett", "Grace", "Chloe", "Victoria", "Riley", 
-               "Aubrey", "Zoey", "Layla"]
 
 def get_name():
     return random.choice(names)
 
 def get_movie():
-    return input("What movie do you want to watch? \n")
+    page = random.randint(1, 10)
+    url = "https://api.themoviedb.org/3/movie/popular"
+    params = {"api_key": API_KEY, "page": page}
+    response = requests.get(url, params=params)
+    data = response.json()
+    movie = random.choice(data["results"])
+    return movie["title"]
 
-def generate_phone_number():
-    phone_number = random.randint(10**9, (10**10) - 1)
-    return phone_number
-
-def match_maker(movie, number, name):
-    number_str = str(number)
-    formatted = "(" + number_str[:3] + ")" + number_str[3:]
-    print(f"Movie: {movie}")
-    print(f"Name: {name}")
-    print(f"Phone Number: {formatted}")
-    
 
 
 def main():
     movie = get_movie()
-    name = get_name()
-    number = generate_phone_number()
-    match_maker(movie, number, name)
+    print({movie})
+    
 
 
 if __name__ == "__main__":
-    main()  
+    main()
