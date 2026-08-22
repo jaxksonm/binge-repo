@@ -34,14 +34,14 @@ async function getMovie() {
   };
 }
 
-// Placeholder handlers — wire these up to a database later
+// placeholder handlers wire these up to a database later
 function handleLikeMovie(movie) {
-  // TODO: write { movieId: movie.id, liked: true } to db
+  
   console.log("Liked:", movie.title);
 }
 
 function handleDislikeMovie(movie) {
-  // TODO: write { movieId: movie.id, liked: false } to db
+  
   console.log("Disliked:", movie.title);
 }
 
@@ -66,14 +66,14 @@ function ThumbDownIcon({ filled }) {
 function App() {
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [feedback, setFeedback] = useState(null); // "liked" | "disliked" | null
+  const [feedback, setFeedback] = useState(null); 
 
   const handleClick = async () => {
     setLoading(true);
     setFeedback(null);
     try {
       const result = await getMovie();
-      setMovie(result);A
+      setMovie(result);
     } catch (err) {
       console.error(err);
     } finally {
@@ -101,7 +101,7 @@ function App() {
         padding: "0 16px",
       }}
     >
-      <h1 style={{ fontSize: 28, marginBottom: 24 }}>Random Movie</h1>
+      <h1 style={{ fontSize: 28, marginBottom: 24 }}>Movie</h1>
 
       <button
         onClick={handleClick}
@@ -119,7 +119,7 @@ function App() {
           transition: "opacity 0.15s ease",
         }}
       >
-        {loading ? "Loading..." : "Get Random Movie"}
+        {loading ? "Loading..." : "Get Random Movie "}
       </button>
 
       {movie && (
