@@ -23,6 +23,7 @@ async function getMovie() {
   const details = await getMovieDetails(movieId);
 
   return {
+    id: details.id,
     title: details.title,
     overview: details.overview,
     runtime: details.runtime,
@@ -33,15 +34,46 @@ async function getMovie() {
   };
 }
 
+// Placeholder handlers — wire these up to a database later
+function handleLikeMovie(movie) {
+  // TODO: write { movieId: movie.id, liked: true } to db
+  console.log("Liked:", movie.title);
+}
+
+function handleDislikeMovie(movie) {
+  // TODO: write { movieId: movie.id, liked: false } to db
+  console.log("Disliked:", movie.title);
+}
+
+function ThumbUpIcon({ filled }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
+      <path d="M7 10v12" />
+      <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h.66a2.5 2.5 0 0 1 2.34 3.38Z" />
+    </svg>
+  );
+}
+
+function ThumbDownIcon({ filled }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
+      <path d="M17 14V2" />
+      <path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h-.66a2.5 2.5 0 0 1-2.34-3.38Z" />
+    </svg>
+  );
+}
+
 function App() {
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState(null); // "liked" | "disliked" | null
 
   const handleClick = async () => {
     setLoading(true);
+    setFeedback(null);
     try {
       const result = await getMovie();
-      setMovie(result);
+      setMovie(result);A
     } catch (err) {
       console.error(err);
     } finally {
@@ -49,22 +81,130 @@ function App() {
     }
   };
 
+  const onLike = () => {
+    handleLikeMovie(movie);
+    setFeedback("liked");
+  };
+
+  const onDislike = () => {
+    handleDislikeMovie(movie);
+    setFeedback("disliked");
+  };
+
   return (
-    <div style={{ maxWidth: 500, margin: "40px auto", fontFamily: "sans-serif", textAlign: "center" }}>
-      <h1>Random Movie</h1>
-      <button onClick={handleClick} disabled={loading}>
+    <div
+      style={{
+        maxWidth: 480,
+        margin: "40px auto",
+        fontFamily: "system-ui, -apple-system, sans-serif",
+        textAlign: "center",
+        padding: "0 16px",
+      }}
+    >
+      <h1 style={{ fontSize: 28, marginBottom: 24 }}>Random Movie</h1>
+
+      <button
+        onClick={handleClick}
+        disabled={loading}
+        style={{
+          padding: "12px 24px",
+          fontSize: 15,
+          fontWeight: 600,
+          backgroundColor: "#111",
+          color: "#fff",
+          border: "none",
+          borderRadius: 8,
+          cursor: loading ? "default" : "pointer",
+          opacity: loading ? 0.6 : 1,
+          transition: "opacity 0.15s ease",
+        }}
+      >
         {loading ? "Loading..." : "Get Random Movie"}
       </button>
 
       {movie && (
-        <div style={{ marginTop: 20, textAlign: "left" }}>
-          <h2>{movie.title}</h2>
+        <div
+          style={{
+            marginTop: 28,
+            textAlign: "left",
+            backgroundColor: "#fafafa",
+            border: "1px solid #eee",
+            borderRadius: 12,
+            overflow: "hidden",
+          }}
+        >
           {movie.posterUrl && (
-            <img src={movie.posterUrl} alt={movie.title} style={{ width: "100%" }} />
+            <img
+              src={movie.posterUrl}
+              alt={movie.title}
+              style={{ width: "100%", display: "block" }}
+            />
           )}
-          <p><strong>Genres:</strong> {movie.genres.join(", ")}</p>
-          <p><strong>Runtime:</strong> {movie.runtime} minutes</p>
-          <p><strong>Overview:</strong> {movie.overview}</p>
+
+          <div style={{ padding: 20 }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                gap: 12,
+              }}
+            >
+              <h2 style={{ margin: 0, fontSize: 20 }}>{movie.title}</h2>
+
+              <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+                <button
+                  onClick={onLike}
+                  aria-label="Like this movie"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 40,
+                    height: 40,
+                    borderRadius: "50%",
+                    border: feedback === "liked" ? "none" : "1px solid #ddd",
+                    backgroundColor: feedback === "liked" ? "#22c55e" : "#fff",
+                    color: feedback === "liked" ? "#fff" : "#555",
+                    cursor: "pointer",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  <ThumbUpIcon filled={feedback === "liked"} />
+                </button>
+
+                <button
+                  onClick={onDislike}
+                  aria-label="Dislike this movie"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 40,
+                    height: 40,
+                    borderRadius: "50%",
+                    border: feedback === "disliked" ? "none" : "1px solid #ddd",
+                    backgroundColor: feedback === "disliked" ? "#ef4444" : "#fff",
+                    color: feedback === "disliked" ? "#fff" : "#555",
+                    cursor: "pointer",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  <ThumbDownIcon filled={feedback === "disliked"} />
+                </button>
+              </div>
+            </div>
+
+            <p style={{ margin: "12px 0 4px", color: "#666", fontSize: 14 }}>
+              <strong style={{ color: "#111" }}>{movie.genres.join(", ")}</strong>
+              {" · "}
+              {movie.runtime} min
+            </p>
+
+            <p style={{ marginTop: 12, lineHeight: 1.5, color: "#333" }}>
+              {movie.overview}
+            </p>
+          </div>
         </div>
       )}
     </div>
