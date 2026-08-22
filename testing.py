@@ -13,9 +13,6 @@ API_KEY = os.getenv("IMDB_API_KEY") # use this api key for the movie
 
 
 
-def get_name():
-    return random.choice(names)
-
 def get_movie():
     page = random.randint(1, 10)
     url = "https://api.themoviedb.org/3/movie/popular"
