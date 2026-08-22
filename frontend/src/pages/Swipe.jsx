@@ -36,10 +36,28 @@ async function getMovie() {
   };
 }
 
-// Placeholder handlers — wire these up to Supabase (Lane B)
-function handleLikeMovie(movie) {
-  // TODO: write { movieId: movie.id, genre_ids: movie.genre_ids, liked: true } to swipes table
+async function handleLikeMovie(movie) {
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    console.error("No logged-in user found:", userError);
+    return false;          // ← add this
+  }
+
+  const { error } = await supabase.from("swipes").insert({
+    profile_id: user.id,
+    movie_id: movie.id,
+    genre_ids: movie.genre_ids,
+    liked: true,
+  });
+
+  if (error) {
+    console.error("Error saving like:", error);
+    return false;          // ← add this
+  }
+
   console.log("Liked:", movie.title);
+  return true;              // ← add this
 }
 
 function handleDislikeMovie(movie) {
@@ -83,10 +101,10 @@ export default function Swipe() {
     }
   };
 
-  const onLike = () => {
-    handleLikeMovie(movie);
-    setFeedback("liked");
-  };
+  const onLike = async () => {
+  const success = await handleLikeMovie(movie);
+  if (success) setFeedback("liked");
+};
 
   const onDislike = () => {
     handleDislikeMovie(movie);
