@@ -57,11 +57,10 @@ async function handleLikeMovie(movie) {
   }
 
   console.log("Liked:", movie.title);
-  return true;              // ← add this
+  return true;
 }
 
 function handleDislikeMovie(movie) {
- 
   console.log("Disliked:", movie.title);
 }
 
@@ -83,7 +82,7 @@ function ThumbDownIcon({ filled }) {
   );
 }
 
-export default function Swipe() {
+export default function Swipe({ onSwitchToLikes }) {
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState(null); 
@@ -102,9 +101,9 @@ export default function Swipe() {
   };
 
   const onLike = async () => {
-  const success = await handleLikeMovie(movie);
-  if (success) setFeedback("liked");
-};
+    const success = await handleLikeMovie(movie);
+    if (success) setFeedback("liked");
+  };
 
   const onDislike = () => {
     handleDislikeMovie(movie);
@@ -127,20 +126,36 @@ export default function Swipe() {
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
         <h1 style={{ fontSize: 28, margin: 0 }}>Random Movie</h1>
-        <button
-          onClick={handleSignOut}
-          style={{
-            padding: "8px 16px",
-            fontSize: 13,
-            backgroundColor: "transparent",
-            border: "1px solid #ddd",
-            borderRadius: 8,
-            cursor: "pointer",
-            color: "#666",
-          }}
-        >
-          Sign out
-        </button>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            onClick={onSwitchToLikes}
+            style={{
+              padding: "8px 16px",
+              fontSize: 13,
+              backgroundColor: "transparent",
+              border: "1px solid #ddd",
+              borderRadius: 8,
+              cursor: "pointer",
+              color: "#666",
+            }}
+          >
+            My Likes
+          </button>
+          <button
+            onClick={handleSignOut}
+            style={{
+              padding: "8px 16px",
+              fontSize: 13,
+              backgroundColor: "transparent",
+              border: "1px solid #ddd",
+              borderRadius: 8,
+              cursor: "pointer",
+              color: "#666",
+            }}
+          >
+            Sign out
+          </button>
+        </div>
       </div>
 
       <button
