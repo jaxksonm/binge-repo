@@ -60,8 +60,51 @@ async function handleLikeMovie(movie) {
   return true;
 }
 
-function handleDislikeMovie(movie) {
+async function handleDislikeMovie(movie) {
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    console.error("No logged-in user found:", userError);
+    return false;
+  }
+
+  const { error } = await supabase.from("swipes").insert({
+    profile_id: user.id,
+    movie_id: movie.id,
+    genre_ids: movie.genre_ids,
+    liked: false,
+  });
+
+  if (error) {
+    console.error("Error saving dislike:", error);
+    return false;
+  }
+
   console.log("Disliked:", movie.title);
+  return true;
+}
+
+async function handleUnswipeMovie(movie) {
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    console.error("No logged-in user found:", userError);
+    return false;
+  }
+
+  const { error } = await supabase
+    .from("swipes")
+    .delete()
+    .eq("profile_id", user.id)
+    .eq("movie_id", movie.id);
+
+  if (error) {
+    console.error("Error removing swipe:", error);
+    return false;
+  }
+
+  console.log("Unswiped:", movie.title);
+  return true;
 }
 
 function ThumbUpIcon({ filled }) {
@@ -101,13 +144,29 @@ export default function Swipe({ onSwitchToLikes }) {
   };
 
   const onLike = async () => {
+    if (feedback === "liked") {
+      const success = await handleUnswipeMovie(movie);
+      if (success) setFeedback(null);
+      return;
+    }
+    if (feedback === "disliked") {
+      await handleUnswipeMovie(movie);
+    }
     const success = await handleLikeMovie(movie);
     if (success) setFeedback("liked");
   };
 
-  const onDislike = () => {
-    handleDislikeMovie(movie);
-    setFeedback("disliked");
+  const onDislike = async () => {
+    if (feedback === "disliked") {
+      const success = await handleUnswipeMovie(movie);
+      if (success) setFeedback(null);
+      return;
+    }
+    if (feedback === "liked") {
+      await handleUnswipeMovie(movie);
+    }
+    const success = await handleDislikeMovie(movie);
+    if (success) setFeedback("disliked");
   };
 
   const handleSignOut = async () => {

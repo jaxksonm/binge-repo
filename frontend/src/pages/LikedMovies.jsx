@@ -69,6 +69,26 @@ export default function LikedMovies({ onSwitchToSwipe }) {
     };
   }, []);
 
+  const handleUnlike = async (movieId) => {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) return;
+
+    const { error } = await supabase
+      .from("swipes")
+      .delete()
+      .eq("profile_id", user.id)
+      .eq("movie_id", movieId)
+      .eq("liked", true);
+
+    if (error) {
+      console.error("Error unliking movie:", error);
+      return;
+    }
+
+    setMovies((prev) => prev.filter((m) => m.id !== movieId));
+  };
+
   return (
     <div
       style={{
@@ -153,6 +173,23 @@ export default function LikedMovies({ onSwitchToSwipe }) {
                     {movie.release_date.slice(0, 4)}
                   </p>
                 )}
+                <button
+                  onClick={() => handleUnlike(movie.id)}
+                  style={{
+                    marginTop: 8,
+                    width: "100%",
+                    padding: "6px 0",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    backgroundColor: "transparent",
+                    border: "1px solid #ddd",
+                    borderRadius: 6,
+                    cursor: "pointer",
+                    color: "#ef4444",
+                  }}
+                >
+                  Unlike
+                </button>
               </div>
             </div>
           ))}
