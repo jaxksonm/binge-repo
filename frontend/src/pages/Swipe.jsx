@@ -183,7 +183,7 @@ export default function Swipe({ onSwitchToLikes }) {
         padding: "0 16px",
       }}
     >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
         <h1 style={{ fontSize: 28, margin: 0 }}>Random Movie</h1>
         <div style={{ display: "flex", gap: 8 }}>
           <button
