@@ -13,12 +13,11 @@ export default function SignUp({ onSwitchToLogin }) {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
-    // Prevent the browser from refreshing the page on form submit
+
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    // Step 1: Create the auth account in Supabase
     const { data, error: signUpError } = await supabase.auth.signUp({ email, password });
 
     if (signUpError) {
@@ -27,9 +26,6 @@ export default function SignUp({ onSwitchToLogin }) {
       return;
     }
 
-    // Step 2: Insert a row in the profiles table for this new user.
-    // data.user.id is the UUID Supabase generated for their auth account —
-    // this is the same id we use as the primary key in our profiles table.
     const { error: profileError } = await supabase.from("profiles").insert({
       id: data.user.id,
       name,
@@ -42,8 +38,6 @@ export default function SignUp({ onSwitchToLogin }) {
       return;
     }
 
-    // If both succeeded, App.jsx's onAuthStateChange listener will automatically
-    // detect the new session and switch to the Swipe screen.
     setLoading(false);
   };
 

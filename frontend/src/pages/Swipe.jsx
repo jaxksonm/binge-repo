@@ -41,7 +41,7 @@ async function handleLikeMovie(movie) {
 
   if (userError || !user) {
     console.error("No logged-in user found:", userError);
-    return false;          // ← add this
+    return false;         
   }
 
   const { error } = await supabase.from("swipes").insert({
@@ -53,7 +53,7 @@ async function handleLikeMovie(movie) {
 
   if (error) {
     console.error("Error saving like:", error);
-    return false;          // ← add this
+    return false;          
   }
 
   console.log("Liked:", movie.title);
@@ -61,7 +61,7 @@ async function handleLikeMovie(movie) {
 }
 
 function handleDislikeMovie(movie) {
-  // TODO: write { movieId: movie.id, genre_ids: movie.genre_ids, liked: false } to swipes table
+ 
   console.log("Disliked:", movie.title);
 }
 
@@ -86,7 +86,7 @@ function ThumbDownIcon({ filled }) {
 export default function Swipe() {
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [feedback, setFeedback] = useState(null); // "liked" | "disliked" | null
+  const [feedback, setFeedback] = useState(null); 
 
   const handleClick = async () => {
     setLoading(true);

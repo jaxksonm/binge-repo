@@ -20,8 +20,6 @@ export default function LogIn({ onSwitchToSignUp }) {
       return;
     }
 
-    // If successful, App.jsx's onAuthStateChange listener will automatically
-    // detect the new session and switch to the Swipe screen.
     setLoading(false);
   };
 
